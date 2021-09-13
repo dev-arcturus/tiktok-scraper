@@ -2,8 +2,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-throw-literal */
 /* eslint-disable no-restricted-syntax */
+
 import { tmpdir } from 'os';
-import { readFile, writeFile, unlink } from 'fs';
+import { readFile, writeFile, unlink } from 'react-native-fs';
 import { fromCallback } from 'bluebird';
 import { forEachLimit } from 'async';
 import { TikTokScraper } from './core';
@@ -55,7 +56,7 @@ const getInitOptions = () => {
  */
 const proxyFromFile = async (file: string) => {
     try {
-        const data = (await fromCallback(cb => readFile(file, { encoding: 'utf-8' }, cb))) as string;
+        const data = (await fromCallback(() => readFile(file, { encoding: 'utf-8' }))) as string;
         const proxyList = data.split('\n');
         if (!proxyList.length) {
             throw new Error('Proxy file is empty');
@@ -72,7 +73,7 @@ const proxyFromFile = async (file: string) => {
  */
 const sessionFromFile = async (file: string) => {
     try {
-        const data = (await fromCallback(cb => readFile(file, { encoding: 'utf-8' }, cb))) as string;
+        const data = (await fromCallback(() => readFile(file, { encoding: 'utf-8' }))) as string;
         const proxyList = data.split('\n');
         if (!proxyList.length || proxyList[0] === '') {
             throw new Error('Session file is empty');
@@ -262,7 +263,7 @@ export const history = async (input: string, options = {} as Options) => {
 
     const historyPath = process.env.SCRAPING_FROM_DOCKER ? '/usr/app/files' : options?.historyPath || tmpdir();
     try {
-        store = (await fromCallback(cb => readFile(`${historyPath}/tiktok_history.json`, { encoding: 'utf-8' }, cb))) as string;
+        store = (await fromCallback(() => readFile(`${historyPath}/tiktok_history.json`, { encoding: 'utf-8' }))) as string;
     } catch (error) {
         throw `History file doesn't exist`;
     }
@@ -275,9 +276,9 @@ export const history = async (input: string, options = {} as Options) => {
         if (type === 'all') {
             const remove: any = [];
             for (const key of Object.keys(historyStore)) {
-                remove.push(fromCallback(cb => unlink(historyStore[key].file_location, cb)));
+                remove.push(fromCallback(() => unlink(historyStore[key].file_location)));
             }
-            remove.push(fromCallback(cb => unlink(`${historyPath}/tiktok_history.json`, cb)));
+            remove.push(fromCallback(() => unlink(`${historyPath}/tiktok_history.json`)));
 
             await Promise.all(remove);
 
@@ -289,11 +290,11 @@ export const history = async (input: string, options = {} as Options) => {
         if (historyStore[key]) {
             const historyFile = historyStore[key].file_location;
 
-            await fromCallback(cb => unlink(historyFile, cb));
+            await fromCallback(() => unlink(historyFile));
 
             delete historyStore[key];
 
-            await fromCallback(cb => writeFile(`${historyPath}/tiktok_history.json`, JSON.stringify(historyStore), cb));
+            await fromCallback(() => writeFile(`${historyPath}/tiktok_history.json`, JSON.stringify(historyStore)));
 
             return { message: `Record ${key} was removed` };
         }
@@ -375,7 +376,7 @@ const batchProcessor = (batch: Batcher[], options = {} as Options): Promise<any[
 export const fromfile = async (input: string, options = {} as Options) => {
     let inputFile: string;
     try {
-        inputFile = (await fromCallback(cb => readFile(input, { encoding: 'utf-8' }, cb))) as string;
+        inputFile = (await fromCallback(() => readFile(input, { encoding: 'utf-8' }))) as string;
     } catch (error) {
         throw `Can't find fle: ${input}`;
     }

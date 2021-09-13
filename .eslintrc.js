@@ -15,7 +15,12 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier'],
     rules: {
-        'prettier/prettier': ['error'],
+        'prettier/prettier': [
+            'error',
+            {
+                endOfLine: 'auto',
+            },
+        ],
         'import/no-unresolved': 'off',
         'import/extensions': 'off',
         'no-bitwise': 'off',
@@ -30,10 +35,10 @@ module.exports = {
             },
         },
         {
-          files: ['*.test.ts'],
-          env: {
-            jest: true
-          }
-        }
+            files: ['*.test.ts'],
+            env: {
+                jest: true,
+            },
+        },
     ],
 };
